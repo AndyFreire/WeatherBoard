@@ -8,6 +8,8 @@ $(document).ready(function () {
     var storedCities = [];
     var numberOfDays = 5;
 
+    var navWeatherIcon = $("#nav-weather-icon");
+
     // Initialize the app
     init();
 
@@ -135,6 +137,9 @@ $(document).ready(function () {
                 weatherDiv.html("<div class='card w-100 mb-4'><div class='card-body'><h2 class='card-title'>" + currentCity + " " + moment().format('l') + "</h2> <p class='card-text'>Temperature: " + oneCallResponse.current.temp + " °F</p> <p class='card-text'>Humidity: " + oneCallResponse.current.humidity + "%</p><p class='card-text'>Wind Speed: " + oneCallResponse.current.wind_speed + " MPH</p> <p class='card-text'>UV Index: <button type='button' class='btn btn-" + conditions + "'>" + uvIndex + "</button></p></div></div>");
 
                 weatherSection.append(weatherDiv);
+
+                // Update the nav icon
+                navWeatherIcon.attr("src", "http://openweathermap.org/img/wn/" + oneCallResponse.current.weather[0].icon + ".png");
 
                 // Render the forecast title
                 var forecastTitle = $("<h2>");
