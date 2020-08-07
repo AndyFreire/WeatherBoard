@@ -2,6 +2,10 @@
     width: 160px;
 }
 
+.bg-custom{
+    background-color: rgb(199, 232, 245);
+}
+
 body{
-    overflow: hidden;
+    overflow-x: hidden;
 }

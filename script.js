@@ -1,4 +1,4 @@
-$(document).ready(function(){
+$(document).ready(function () {
 
     var searchInput = $("#search-input");
 
@@ -15,51 +15,27 @@ $(document).ready(function(){
 
 
     // When the search button is clicked...
-    $("#search-btn").on("click", function(){
+    $("#search-btn").on("click", function () {
 
-        // Build the queryURL with input and APIKey
-        var queryURL = "http://api.openweathermap.org/data/2.5/weather?units=imperial&q=" + searchInput.val() + "&appid=" + APIKey;
+        renderWeatherData(searchInput.val());
 
         // Clear the search field
         searchInput.val("");
 
-        // Call OpenWeather API
-        $.ajax({
-            url:  queryURL,
-            method: 'GET'
-        }).then(function(response){
-
-            console.log(response);
-
-            // Store the city in our array
-            storedCities.push(response.name);
-            localStorage.setItem("cities", JSON.stringify(storedCities));
-
-            // Get our weather data section
-            var weatherSection = $("#weather-data");
-
-            // Clear the HTML
-            weatherSection.html("");
-
-            // Render today's weather
-            var weatherDiv = $("<div>");
-            weatherDiv.attr("class", "row m-3");
-
-            weatherDiv.html("<div class='card w-100 mb-4'><div class='card-body'><h2 class='card-title'>" + response.name + " " +  moment().format('l') + "</h2> <p class='card-text'>Temperature: " + response.main.temp + " °F</p> <p class='card-text'>Humidity: " + response.main.humidity + "%</p><p class='card-text'>Wind Speed: " + response.wind.speed + "MPH</p> <p class='card-text'>UV Index: <button type='button' class='btn btn-danger'>9.49</button></p></div></div>")
-
-            weatherSection.append(weatherDiv);
-
-
-        });
-
     });
 
-    function init(){
+    // When a city button is clicked...
+    $(document).on("click", ".city-button", function(){
+        
+    })
+
+
+    function init() {
         renderCities();
     }
 
 
-    function renderCities(){
+    function renderCities() {
 
         // Grab the cities list element
         var citiesList = $("#cities-list");
@@ -68,50 +44,147 @@ $(document).ready(function(){
         citiesList.html("");
 
         // Grab the cities in localStorage,
-        if (localStorage.getItem("cities")){
+        if (localStorage.getItem("cities")) {
             storedCities = JSON.parse(localStorage.getItem("cities"));
         }
 
-        if (storedCities){
+        if (storedCities) {
 
             storedCities.forEach(city => {
                 // Create a new list item
                 var li = $("<li>");
-    
+
                 // Set the bootstrap classes
-                li.attr("class", "list-group-item d-flex justify-content-between align-items-center");
-    
+                li.attr("class", "city-button list-group-item d-flex justify-content-between align-items-center");
+                li.attr("data-city", city);
+
                 // Update the city name and add an icon inside the li
                 li.html(city + "<i class='fa fa-building'></i>");
-    
+
                 // Append to our html element
                 citiesList.append(li);
-    
-            });    
+
+            });
 
         }
     }
 
-    function renderTodaysWeather(weatherData){
+    function renderWeatherData(cityName) {
 
-        // Get our weather data section
-        var weatherSection = $("#weather-data");
+        // Build the queryURL with input and APIKey
+        var queryURL = "http://api.openweathermap.org/data/2.5/weather?units=imperial&q=" + cityName + "&appid=" + APIKey;
 
-        // Clear the HTML
-        weatherSection.html("");
+        // Call OpenWeather API
+        $.ajax({
+            url: queryURL,
+            method: 'GET'
+        }).then(function (response) {
 
-        if (currentCity){
-            // Render the current city's weather
-            // var weatherDiv = $("<div>");
-            // weatherDiv.attr("class", "row m-3");
+            // Get the latitude and longitude for Response 1
+            var lat = response.coord.lat;
+            var lon = response.coord.lon;
 
-            // weatherDiv.html("<div class='card w-100 mb-4'><div class='card-body'><h2 class='card-title'>" + currentCity + " " +  moment().format('l') + "</h2> <p class='card-text'>Temperature: 90.9 °F</p> <p class='card-text'>Humidity:" + + "</p><p class='card-text'>Wind Speed:  + 4.7 MPH + </p> <p class='card-text'>UV Index: <button type='button' class='btn btn-danger'> + 9.49 + </button></p></div></div>")
+            currentCity = response.name;
 
-            // weatherSection.append(weatherDiv);
+            // Store the city in our array if its not already there
+            if (!storedCities.includes(currentCity)) {
+                storedCities.push(currentCity);
+                localStorage.setItem("cities", JSON.stringify(storedCities));
+            }
+            // Update the cities view
+            renderCities();
 
-        } else {
-            // Display prompt to user
-        }
+            var queryURL2 = "https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&exclude=minutely,hourly&units=imperial&appid=" + APIKey;
+
+            $.ajax({
+                url: queryURL2,
+                method: 'GET'
+            }).then(function (oneCallResponse) {
+
+                console.log(oneCallResponse);
+
+                // Get our weather data section
+                var weatherSection = $("#weather-data");
+
+                // Clear the HTML
+                weatherSection.html("");
+
+                // Render today's weather
+                var weatherDiv = $("<div>");
+                weatherDiv.attr("class", "row m-3");
+
+                // Parse the UV Index
+                var uvIndex = oneCallResponse.current.uvi;
+                var conditions = "secondary";
+
+                switch (true) {
+                    case uvIndex <= 5: conditions = "success";
+                        break;
+                    case uvIndex > 5 && uvIndex <= 7: conditions = "warning";
+                        break;
+                    case uvIndex > 7: conditions = "danger";
+                        break;
+                    default: conditions = "secondary"
+                }
+
+                // Update the weather div with today's weather and date
+                weatherDiv.html("<div class='card w-100 mb-4'><div class='card-body'><h2 class='card-title'>" + currentCity + " " + moment().format('l') + "</h2> <p class='card-text'>Temperature: " + oneCallResponse.current.temp + " °F</p> <p class='card-text'>Humidity: " + oneCallResponse.current.humidity + "%</p><p class='card-text'>Wind Speed: " + oneCallResponse.current.wind_speed + " MPH</p> <p class='card-text'>UV Index: <button type='button' class='btn btn-" + conditions + "'>" + uvIndex + "</button></p></div></div>");
+
+                weatherSection.append(weatherDiv);
+
+                // Render the forecast title
+                var forecastTitle = $("<h2>");
+                forecastTitle.attr("class", "row m-3");
+                forecastTitle.text("5-Day Forecast");
+
+                weatherSection.append(forecastTitle);
+
+                // Render the 5 day forecast cards
+                var forecastDiv = $("<div>");
+                forecastDiv.attr("class", "row m-3");
+
+                // Get the daily forecast array
+                var dailyForecast = oneCallResponse.daily;
+
+                for (var i = 0; i < numberOfDays; i++) {
+
+                    // Create a new div for each day
+                    var forecastCard = $("<div>");
+
+                    var forecastDate = convertDate(dailyForecast[i].dt);
+
+                    var iconURL = "http://openweathermap.org/img/wn/" + dailyForecast[i].weather[0].icon + "@2x.png";
+
+                    forecastCard.html("<div class='card bg-custom forecast-card m-2'> <div class='card-body'> <h5 class='card-title'>" + forecastDate + "</h5> <img src='" + iconURL + "' alt='weather-icon'><p class='card-text'> Temp: " + dailyForecast[i].temp.day + " °F </p> <p class='card-text'>Humidity: " + dailyForecast[i].humidity + "%</p> </div> </div>");
+
+                    forecastDiv.append(forecastCard);
+
+                }
+
+                weatherSection.append(forecastDiv);
+
+
+            })
+
+        });
+
+    }
+
+    function convertDate(timestamp) {
+
+        // multiply the timestamp by 1000 and create as a new date
+        var date = new Date(timestamp * 1000);
+
+        // Get the month
+        var month = date.getMonth() + 1;
+
+        // Day
+        var day = date.getDate() + 1;
+
+        // Get the year
+        var year = date.getFullYear();
+
+        return month + "/" + day + "/" + year;
 
     }
 
