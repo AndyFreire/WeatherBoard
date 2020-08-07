@@ -26,6 +26,10 @@ $(document).ready(function () {
 
     // When a city button is clicked...
     $(document).on("click", ".city-button", function(){
+
+        var cityName = $(this).data("city");
+
+        renderWeatherData(cityName);
         
     })
 
