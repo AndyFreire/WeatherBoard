@@ -134,7 +134,7 @@ $(document).ready(function () {
                 }
 
                 // Update the weather div with today's weather and date
-                weatherDiv.html("<div class='card w-100 mb-4'><div class='card-body'><h2 class='card-title'>" + currentCity + " " + moment().format('l') + "</h2> <p class='card-text'>Temperature: " + oneCallResponse.current.temp + " °F</p> <p class='card-text'>Humidity: " + oneCallResponse.current.humidity + "%</p><p class='card-text'>Wind Speed: " + oneCallResponse.current.wind_speed + " MPH</p> <p class='card-text'>UV Index: <button type='button' class='btn btn-" + conditions + "'>" + uvIndex + "</button></p></div></div>");
+                weatherDiv.html("<div class='card w-100 mb-4'><div class='card-body'><h2 class='card-title'>" + currentCity + " " + convertDate(oneCallResponse.current.dt) + "</h2> <p class='card-text'>Temperature: " + oneCallResponse.current.temp + " °F</p> <p class='card-text'>Humidity: " + oneCallResponse.current.humidity + "%</p><p class='card-text'>Wind Speed: " + oneCallResponse.current.wind_speed + " MPH</p> <p class='card-text'>UV Index: <button type='button' class='btn btn-" + conditions + "'>" + uvIndex + "</button></p></div></div>");
 
                 weatherSection.append(weatherDiv);
 
@@ -155,7 +155,7 @@ $(document).ready(function () {
                 // Get the daily forecast array
                 var dailyForecast = oneCallResponse.daily;
 
-                for (var i = 0; i < numberOfDays; i++) {
+                for (var i = 1; i < numberOfDays + 1; i++) {
 
                     // Create a new div for each day
                     var forecastCard = $("<div>");
@@ -188,7 +188,7 @@ $(document).ready(function () {
         var month = date.getMonth() + 1;
 
         // Day
-        var day = date.getDate() + 1;
+        var day = date.getDate();
 
         // Get the year
         var year = date.getFullYear();
