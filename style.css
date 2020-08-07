@@ -1,5 +1,11 @@
 .forecast-card{
     width: 160px;
+    transition: all .6s ease;
+}
+
+.forecast-card:hover{
+    transform: scale(1.05);
+
 }
 
 .bg-custom{
