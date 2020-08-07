@@ -1,3 +1,7 @@
 .forecast-card{
     width: 160px;
 }
+
+body{
+    overflow: hidden;
+}
