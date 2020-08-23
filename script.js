@@ -47,7 +47,7 @@ $(document).ready(function () {
         var citiesList = $("#cities-list");
 
         // Clear it
-        citiesList.html("");
+        citiesList.empty();
 
         // Grab the cities in localStorage,
         if (localStorage.getItem("cities")) {
@@ -78,7 +78,7 @@ $(document).ready(function () {
     function renderWeatherData(cityName) {
 
         // Build the queryURL with input and APIKey
-        var queryURL = "http://api.openweathermap.org/data/2.5/weather?units=imperial&q=" + cityName + "&appid=" + APIKey;
+        var queryURL = "https://api.openweathermap.org/data/2.5/weather?units=imperial&q=" + cityName + "&appid=" + APIKey;
 
         // Call OpenWeather API
         $.ajax({
